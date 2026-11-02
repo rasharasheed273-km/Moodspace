@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOODSPACE – Your Little Corner of Feelings</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        lavender: { 50: '#f8f5ff', 100: '#efe6ff', 200: '#e1d0ff', 300: '#cbabff', 400: '#b17aff', 500: '#984cfd', 600: '#872af4', 700: '#751bd9', 800: '#6217b5', 900: '#511494' },
+                        blush: { 50: '#fff5f7', 100: '#ffe6ec', 200: '#ffccd8', 300: '#ffa1b8', 400: '#ff668d', 500: '#f83b6b' },
+                        sage: { 50: '#f4f7f4', 100: '#e3ece3', 200: '#c6d9c6', 300: '#a1bf9f', 400: '#79a076', 500: '#598256' },
+                        cream: { 50: '#fdfbf7', 100: '#f9f4ea', 200: '#f3e8d4', 300: '#e9d6b5', 400: '#ddbf92' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        handwriting: ['Caveat', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom scrollbars & smooth transitions */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(160, 160, 160, 0.3); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(140, 140, 140, 0.5); }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .journal-paper {
+            background-color: #fdfbf7;
+            background-image: repeating-linear-gradient(#fdfbf7 0px, #fdfbf7 27px, #e5dfd3 28px);
+            line-height: 28px;
+        }
+        .dark .journal-paper {
+            background-color: #1e1e24;
+            background-image: repeating-linear-gradient(#1e1e24 0px, #1e1e24 27px, #2d2d38 28px);
+            line-height: 28px;
+        }
+
+        /* Breathing Animation */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.6); opacity: 1; }
+        }
+        .animate-breathe {
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        /* Soft Glow Effects */
+        .glow-lavender { box-shadow: 0 10px 30px -10px rgba(180, 140, 255, 0.3); }
+        .glow-blush { box-shadow: 0 10px 30px -10px rgba(255, 160, 180, 0.3); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col selection:bg-lavender-200 selection:text-lavender-900">
+
+    <!-- TOP NAVIGATION -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/60 dark:border-slate-800/60 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lavender-300 via-blush-200 to-sage-200 dark:from-lavender-800 dark:to-sage-800 flex items-center justify-center shadow-sm">
+                    <span class="text-xl">🌸</span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-lavender-600 to-blush-500 bg-clip-text text-transparent dark:from-lavender-300 dark:to-blush-300">MOODSPACE</h1>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Your Corner of Feelings</p>
+                </div>
+            </div>
+
+            <!-- Desktop Nav Items -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/50 p-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-700 dark:text-slate-200 hover:text-lavender-600">
+                    <i class="fa-solid fa-house mr-1.5 text-xs"></i>Home
+                </button>
+                <button onclick="switchTab('checkin')" id="nav-checkin" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:text-lavender-600">
+                    <i class="fa-solid fa-heart-pulse mr-1.5 text-xs"></i>Check-in
+                </button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:text-lavender-600">
+                    <i class="fa-solid fa-calendar-days mr-1.5 text-xs"></i>Calendar
+                </button>
+                <button onclick="switchTab('insights')" id="nav-insights" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:text-lavender-600">
+                    <i class="fa-solid fa-chart-pie mr-1.5 text-xs"></i>Insights
+                </button>
+                <button onclick="switchTab('journal')" id="nav-journal" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:text-lavender-600">
+                    <i class="fa-solid fa-book-open mr-1.5 text-xs"></i>Journal
+                </button>
+                <button onclick="switchTab('selfcare')" id="nav-selfcare" class="nav-btn px-4 py-1.5 rounded-full text-sm font-medium transition-all text-slate-600 dark:text-slate-400 hover:text-lavender-600">
+                    <i class="fa-solid fa-spa mr-1.5 text-xs"></i>Self-Care
+                </button>
+            </nav>
+
+            <!-- Quick Action & Theme Switcher -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+                <button onclick="switchTab('checkin')" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-lavender-400 to-blush-400 text-white font-medium text-sm hover:opacity-90 transition shadow-sm">
+                    <i class="fa-solid fa-plus text-xs"></i> New Mood
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+
+        <!-- ==================== DASHBOARD SECTION ==================== -->
+        <section id="sec-dashboard" class="tab-content space-y-6">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-lavender-100 via-blush-50 to-sage-100 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-lavender-200/50 dark:border-slate-800 p-6 md:p-8">
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="space-y-2">
+                        <span id="current-date-display" class="text-xs font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase"></span>
+                        <h2 id="greeting-text" class="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">Hey friend, how are you feeling today?</h2>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm max-w-xl italic">
+                            “Every feeling deserves a little space. This is yours. 💗”
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="switchTab('checkin')" class="px-6 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-medium text-sm shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                            Log Today's Mood
+                        </button>
+                    </div>
+                </div>
+                <!-- Background decorative elements -->
+                <div class="absolute -bottom-10 -right-10 w-48 h-48 bg-blush-200/40 dark:bg-blush-900/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -top-10 right-36 w-40 h-40 bg-lavender-200/40 dark:bg-lavender-900/20 rounded-full blur-2xl pointer-events-none"></div>
+            </div>
+
+            <!-- Today's Status & Quote Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Today's Mood Card -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Today's State</h3>
+                        <span class="text-xs bg-lavender-100 text-lavender-700 dark:bg-lavender-950 dark:text-lavender-300 px-2.5 py-1 rounded-full font-medium" id="today-status-badge">Recorded</span>
+                    </div>
+                    <div id="today-mood-container" class="my-auto py-2 flex flex-col items-center text-center">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Daily Motivational Quote -->
+                <div class="md:col-span-2 bg-gradient-to-br from-white to-cream-50 dark:from-slate-900 dark:to-slate-850 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blush-400"></span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Daily Inspiration</span>
+                        </div>
+                        <button onclick="loadRandomQuote()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs flex items-center gap-1 transition">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                        </button>
+                    </div>
+                    <blockquote class="my-auto">
+                        <p id="quote-text" class="text-lg md:text-xl font-handwriting text-slate-700 dark:text-slate-200 leading-relaxed font-bold">
+                            "You don't have to control your thoughts. You just have to stop letting them control you."
+                        </p>
+                        <footer id="quote-author" class="mt-2 text-xs font-medium text-slate-400">— Dan Millman</footer>
+                    </blockquote>
+                </div>
+            </div>
+
+            <!-- Weekly Overview Grid -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">This Week at a Glance</h3>
+                        <p class="text-xs text-slate-400">Your logged emotions over the last 7 days</p>
+                    </div>
+                    <button onclick="switchTab('calendar')" class="text-xs font-medium text-lavender-600 dark:text-lavender-400 hover:underline">View Calendar &rarr;</button>
+                </div>
+                <div id="weekly-strip" class="grid grid-cols-7 gap-2 sm:gap-4 pt-2">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Quick Actions Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div onclick="switchTab('checkin')" class="p-5 rounded-2xl bg-lavender-50 dark:bg-slate-850 border border-lavender-100 dark:border-slate-800 hover:border-lavender-300 cursor-pointer transition flex flex-col items-center text-center gap-2 group">
+                    <div class="w-12 h-12 rounded-2xl bg-lavender-200/60 dark:bg-lavender-900/50 flex items-center justify-center text-lavender-700 dark:text-lavender-300 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-face-smile"></i>
+                    </div>
+                    <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">Mood Check-in</span>
+                </div>
+                <div onclick="switchTab('journal')" class="p-5 rounded-2xl bg-blush-50 dark:bg-slate-850 border border-blush-100 dark:border-slate-800 hover:border-blush-300 cursor-pointer transition flex flex-col items-center text-center gap-2 group">
+                    <div class="w-12 h-12 rounded-2xl bg-blush-200/60 dark:bg-blush-900/50 flex items-center justify-center text-blush-600 dark:text-blush-300 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-pen-nib"></i>
+                    </div>
+                    <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">Write Journal</span>
+                </div>
+                <div onclick="switchTab('selfcare')" class="p-5 rounded-2xl bg-sage-50 dark:bg-slate-850 border border-sage-100 dark:border-slate-800 hover:border-sage-300 cursor-pointer transition flex flex-col items-center text-center gap-2 group">
+                    <div class="w-12 h-12 rounded-2xl bg-sage-200/60 dark:bg-sage-900/50 flex items-center justify-center text-sage-700 dark:text-sage-300 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wind"></i>
+                    </div>
+                    <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">Breathing Room</span>
+                </div>
+                <div onclick="switchTab('insights')" class="p-5 rounded-2xl bg-cream-100/60 dark:bg-slate-850 border border-cream-200 dark:border-slate-800 hover:border-cream-300 cursor-pointer transition flex flex-col items-center text-center gap-2 group">
+                    <div class="w-12 h-12 rounded-2xl bg-cream-200 dark:bg-amber-950 flex items-center justify-center text-amber-700 dark:text-amber-300 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">Mood Analytics</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== MOOD CHECK-IN SECTION ==================== -->
+        <section id="sec-checkin" class="tab-content hidden max-w-3xl mx-auto space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-2xl md:text-3xl font-bold">How are you feeling right now?</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Take a deep breath and connect with your inner state.</p>
+            </div>
+
+            <form id="mood-form" onsubmit="saveMoodEntry(event)" class="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-8">
+                <!-- Emoji Selector -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Select Emotion</label>
+                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-3" id="emoji-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                    <input type="hidden" id="selected-emoji" value="😊" required>
+                    <input type="hidden" id="selected-label" value="Happy">
+                </div>
+
+                <!-- Intensity Slider -->
+                <div class="space-y-3 bg-slate-50 dark:bg-slate-850 p-5 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">Emotional Intensity</label>
+                        <span id="intensity-value" class="px-3 py-1 rounded-full text-xs font-bold bg-lavender-100 text-lavender-700 dark:bg-lavender-900 dark:text-lavender-300">5 / 10</span>
+                    </div>
+                    <input type="range" id="intensity-slider" min="1" max="10" value="5" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-lavender-500" oninput="updateIntensity(this.value)">
+                    <div class="flex justify-between text-[11px] text-slate-400">
+                        <span>Mild / Gentle</span>
+                        <span>Moderate</span>
+                        <span>Very Intense</span>
+                    </div>
+                </div>
+
+                <!-- Context Tags -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">What influenced this feeling?</label>
+                    <div class="flex flex-wrap gap-2" id="tags-container">
+                        <!-- Tags injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Journal Note -->
+                <div class="space-y-2">
+                    <label for="mood-note" class="block text-xs font-bold uppercase tracking-wider text-slate-400">Express in words (Optional)</label>
+                    <textarea id="mood-note" rows="3" placeholder="What made you feel this way? Write whatever is on your mind..." class="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-lavender-400 focus:outline-none text-sm transition"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-lavender-500 via-blush-400 to-sage-400 text-white font-semibold text-base shadow-md hover:opacity-95 transition transform active:scale-[0.99]">
+                    Save Mood Entry 💖
+                </button>
+            </form>
+        </section>
+
+        <!-- ==================== CALENDAR SECTION ==================== -->
+        <section id="sec-calendar" class="tab-content hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold">Mood Calendar</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">A visual timeline of your emotional journey.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="changeMonth(-1)" class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <span id="calendar-month-year" class="font-bold text-sm min-w-[120px] text-center"></span>
+                    <button onclick="changeMonth(1)" class="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar Grid Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm">
+                <!-- Days of week -->
+                <div class="grid grid-cols-7 gap-2 mb-4 text-center font-bold text-xs text-slate-400 uppercase tracking-wider">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <!-- Days Container -->
+                <div id="calendar-days" class="grid grid-cols-7 gap-2">
+                    <!-- Dynamic Days Injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== STATS & INSIGHTS SECTION ==================== -->
+        <section id="sec-insights" class="tab-content hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold">Emotional Analytics</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Discover patterns and understand your well-being.</p>
+                </div>
+            </div>
+
+            <!-- Top Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blush-100 dark:bg-blush-950 flex items-center justify-center text-blush-500 text-2xl" id="insight-top-emoji">
+                        ✨
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase font-semibold">Most Frequent</span>
+                        <h4 class="font-bold text-base text-slate-800 dark:text-slate-100" id="insight-top-mood">None Yet</h4>
+                    </div>
+                </div>
+
+                <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-lavender-100 dark:bg-lavender-950 flex items-center justify-center text-lavender-500 text-2xl">
+                        📈
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase font-semibold">Avg Intensity</span>
+                        <h4 class="font-bold text-base text-slate-800 dark:text-slate-100" id="insight-avg-intensity">0 / 10</h4>
+                    </div>
+                </div>
+
+                <div class="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-sage-100 dark:bg-sage-950 flex items-center justify-center text-sage-500 text-2xl">
+                        📅
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase font-semibold">Total Tracked</span>
+                        <h4 class="font-bold text-base text-slate-800 dark:text-slate-100" id="insight-total-count">0 Days</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Mood Distribution Chart -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 class="font-bold text-base">Mood Distribution</h3>
+                    <div class="relative h-64 flex items-center justify-center">
+                        <canvas id="chart-distribution"></canvas>
+                    </div>
+                </div>
+
+                <!-- Mood Trend Line Chart -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 class="font-bold text-base">Intensity Over Time</h3>
+                    <div class="relative h-64">
+                        <canvas id="chart-trend"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalized Smart Insights Box -->
+            <div class="bg-gradient-to-r from-lavender-100 via-purple-50 to-blush-100 dark:from-slate-900 dark:to-slate-850 p-6 rounded-3xl border border-lavender-200/60 dark:border-slate-800 space-y-3">
+                <div class="flex items-center gap-2 text-lavender-700 dark:text-lavender-300 font-bold">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <h3>Personalized Reflections & Suggestions</h3>
+                </div>
+                <p id="smart-insights-text" class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    Keep logging your mood daily to receive personalized trends and gentle emotional insights.
+                </p>
+            </div>
+        </section>
+
+        <!-- ==================== JOURNAL SECTION ==================== -->
+        <section id="sec-journal" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold">Personal Journal</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">A cozy, judgment-free space for your reflections.</p>
+                </div>
+                <button onclick="openJournalModal()" class="px-4 py-2 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition">
+                    <i class="fa-solid fa-pen"></i> New Journal Entry
+                </button>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="flex items-center gap-3 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 pl-3"></i>
+                <input type="text" id="journal-search" oninput="renderJournalEntries()" placeholder="Search through your entries..." class="w-full bg-transparent text-sm focus:outline-none">
+            </div>
+
+            <!-- Journal List Grid -->
+            <div id="journal-entries-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dynamically Populated -->
+            </div>
+        </section>
+
+        <!-- ==================== SELF-CARE CORNER ==================== -->
+        <section id="sec-selfcare" class="tab-content hidden space-y-8">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+                <h2 class="text-2xl md:text-3xl font-bold">Self-Care Corner</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Pause, take a breath, and nourish your spirit.</p>
+            </div>
+
+            <!-- Breathing Exercise Card -->
+            <div class="bg-gradient-to-br from-lavender-100/50 via-white to-sage-100/50 dark:from-slate-900 dark:to-slate-850 rounded-3xl p-8 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col items-center text-center space-y-6">
+                <div class="space-y-1">
+                    <h3 class="font-bold text-xl">Box Breathing (4-7-8)</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Follow the gentle circle to calm your nervous system.</p>
+                </div>
+
+                <div class="relative w-48 h-48 flex items-center justify-center my-4">
+                    <div id="breath-circle" class="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-lavender-300 to-blush-300 dark:from-lavender-700 dark:to-blush-700 opacity-70"></div>
+                    <span id="breath-text" class="relative z-10 text-base font-bold text-slate-700 dark:text-slate-100 tracking-wide">Press Start</span>
+                </div>
+
+                <button id="breath-btn" onclick="toggleBreathingExercise()" class="px-6 py-2.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-semibold hover:opacity-90 transition">
+                    Start Exercise
+                </button>
+            </div>
+
+            <!-- Two Column Grid for Affirmations & Gratitude -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Affirmations -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-blush-500 font-bold text-sm">
+                            <i class="fa-solid fa-heart"></i>
+                            <h3>Daily Affirmation</h3>
+                        </div>
+                        <button onclick="nextAffirmation()" class="text-xs text-slate-400 hover:text-slate-600 transition">Next &rarr;</button>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-blush-50/50 dark:bg-slate-850 border border-blush-100 dark:border-slate-800 text-center min-h-[120px] flex items-center justify-center">
+                        <p id="affirmation-display" class="font-handwriting text-xl text-slate-800 dark:text-slate-200 font-semibold leading-relaxed">
+                            "I am worthy of peace, love, and forgiveness."
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Gratitude Journal Quick Input -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 text-sage-600 font-bold text-sm">
+                        <i class="fa-solid fa-sun"></i>
+                        <h3>Gratitude Note</h3>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" id="gratitude-input" placeholder="What are you grateful for today?" class="flex-grow p-3 text-sm rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400">
+                            <button onclick="addGratitudeItem()" class="px-4 py-2 bg-sage-500 text-white rounded-xl text-sm font-medium hover:bg-sage-600 transition">Add</button>
+                        </div>
+                        <ul id="gratitude-list" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                            <!-- Injected by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Feature Settings (Data Download / Clear) -->
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h4 class="font-bold text-sm">Manage Your Private Data</h4>
+                    <p class="text-xs text-slate-400">Your entries are strictly saved in your browser storage.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="exportData()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 transition">
+                        <i class="fa-solid fa-download mr-1"></i> Export Data
+                    </button>
+                    <button onclick="confirmClearData()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-300 hover:bg-rose-100 transition">
+                        <i class="fa-solid fa-trash mr-1"></i> Clear All Data
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM BAR -->
+    <div class="md:hidden sticky bottom-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 py-2 px-4 flex justify-around items-center text-xs">
+        <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-lavender-600">
+            <i class="fa-solid fa-house text-base"></i><span>Home</span>
+        </button>
+        <button onclick="switchTab('checkin')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-lavender-600">
+            <i class="fa-solid fa-heart-pulse text-base"></i><span>Mood</span>
+        </button>
+        <button onclick="switchTab('calendar')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-lavender-600">
+            <i class="fa-solid fa-calendar-days text-base"></i><span>Calendar</span>
+        </button>
+        <button onclick="switchTab('journal')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-lavender-600">
+            <i class="fa-solid fa-book-open text-base"></i><span>Journal</span>
+        </button>
+        <button onclick="switchTab('selfcare')" class="flex flex-col items-center gap-1 text-slate-500 hover:text-lavender-600">
+            <i class="fa-solid fa-spa text-base"></i><span>Care</span>
+        </button>
+    </div>
+
+    <!-- JOURNAL ENTRY MODAL -->
+    <div id="journal-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold text-lg">New Journal Entry</h3>
+                <button onclick="closeJournalModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+            </div>
+            <form id="journal-form" onsubmit="saveJournalEntry(event)" class="space-y-4">
+                <input type="hidden" id="journal-id">
+                <div>
+                    <input type="text" id="journal-title-input" placeholder="Title of your entry..." required class="w-full p-3 text-base font-semibold rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-lavender-400">
+                </div>
+                <div>
+                    <textarea id="journal-content-input" rows="8" placeholder="Dear Diary..." required class="journal-paper w-full p-4 text-sm font-sans rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-lavender-400"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeJournalModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-semibold bg-lavender-500 text-white hover:bg-lavender-600 transition">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MOOD DETAIL MODAL -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-400 uppercase tracking-wider">Logged Mood Detail</h3>
+                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+            </div>
+            <div id="detail-modal-body" class="space-y-3">
+                <!-- Injected dynamically -->
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeDetailModal()" class="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        /* ================= STATE & CONFIG ================= */
+        const EMOJIS = [
+            { emoji: '😊', label: 'Happy', color: '#ffb3ba' },
+            { emoji: '🥰', label: 'Loved', color: '#ffdfba' },
+            { emoji: '😌', label: 'Calm', color: '#baffc9' },
+            { emoji: '😔', label: 'Sad', color: '#bae1ff' },
+            { emoji: '😡', label: 'Angry', color: '#ffb3b3' },
+            { emoji: '😰', label: 'Anxious', color: '#e8baf0' },
+            { emoji: '🥺', label: 'Lonely', color: '#d0c3f7' },
+            { emoji: '😴', label: 'Tired', color: '#cfcfcf' },
+            { emoji: '✨', label: 'Excited', color: '#ffffba' }
+        ];
+
+        const TAG_OPTIONS = ['Studies', 'Family', 'Friends', 'Love', 'Work', 'Personal'];
+        
+        const QUOTES = [
+            { text: "You don't have to control your thoughts. You just have to stop letting them control you.", author: "Dan Millman" },
+            { text: "Feelings are just visitors, let them come and go.", author: "Mooji" },
+            { text: "Peace comes from within. Do not seek it without.", author: "Buddha" },
+            { text: "Breathe. It's just a bad day, not a bad life.", author: "Anonymous" },
+            { text: "You are allowed to be both a masterpiece and a work in progress simultaneously.", author: "Sophia Bush" }
+        ];
+
+        const AFFIRMATIONS = [
+            "I am worthy of peace, love, and forgiveness.",
+            "My feelings are valid, and I allow myself to experience them.",
+            "I treat myself with gentleness and respect.",
+            "This moment is temporary, and I am strong.",
+            "I honor my boundaries and value my energy."
+        ];
+
+        let state = {
+            moods: JSON.parse(localStorage.getItem('moodspace_moods') || '[]'),
+            journals: JSON.parse(localStorage.getItem('moodspace_journals') || '[]'),
+            gratitude: JSON.parse(localStorage.getItem('moodspace_gratitude') || '[]'),
+            currentDate: new Date(),
+            selectedTags: []
+        };
+
+        let distributionChart = null;
+        let trendChart = null;
+        let breathInterval = null;
+
+        /* ================= INITIALIZATION ================= */
+        window.onload = function() {
+            initTheme();
+            updateDateDisplays();
+            renderEmojiGrid();
+            renderTags();
+            renderDashboard();
+            renderCalendar();
+            renderJournalEntries();
+            renderGratitudeList();
+            loadRandomQuote();
+            nextAffirmation();
+        };
+
+        /* ================= THEME HANDLER ================= */
+        function initTheme() {
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-moon';
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.theme = isDark ? 'dark' : 'light';
+            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            if (!document.getElementById('sec-insights').classList.contains('hidden')) {
+                renderCharts();
+            }
+        }
+
+        /* ================= TAB NAVIGATION ================= */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-lavender-600');
+                btn.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-lavender-600');
+            }
+
+            if (tabId === 'insights') renderInsights();
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'calendar') renderCalendar();
+        }
+
+        function updateDateDisplays() {
+            const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('en-US', options);
+        }
+
+        /* ================= CHECK-IN FORM LOGIC ================= */
+        function renderEmojiGrid() {
+            const container = document.getElementById('emoji-grid');
+            container.innerHTML = EMOJIS.map(item => `
+                <button type="button" onclick="selectEmoji('${item.emoji}', '${item.label}', this)" class="emoji-btn p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-lavender-400 dark:hover:border-lavender-500 flex flex-col items-center gap-1 transition transform hover:scale-105 ${item.label === 'Happy' ? 'bg-lavender-100/60 dark:bg-lavender-950 border-lavender-300' : ''}">
+                    <span class="text-2xl">${item.emoji}</span>
+                    <span class="text-[11px] font-medium text-slate-600 dark:text-slate-300">${item.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function selectEmoji(emoji, label, element) {
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.classList.remove('bg-lavender-100/60', 'dark:bg-lavender-950', 'border-lavender-300');
+            });
+            element.classList.add('bg-lavender-100/60', 'dark:bg-lavender-950', 'border-lavender-300');
+            document.getElementById('selected-emoji').value = emoji;
+            document.getElementById('selected-label').value = label;
+        }
+
+        function updateIntensity(val) {
+            document.getElementById('intensity-value').innerText = `${val} / 10`;
+        }
+
+        function renderTags() {
+            const container = document.getElementById('tags-container');
+            container.innerHTML = TAG_OPTIONS.map(tag => `
+                <button type="button" onclick="toggleTag('${tag}', this)" class="tag-btn px-3.5 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
+                    ${tag}
+                </button>
+            `).join('');
+        }
+
+        function toggleTag(tag, element) {
+            if (state.selectedTags.includes(tag)) {
+                state.selectedTags = state.selectedTags.filter(t => t !== tag);
+                element.classList.remove('bg-lavender-500', 'text-white');
+                element.classList.add('bg-slate-100', 'dark:bg-slate-850', 'text-slate-600', 'dark:text-slate-300');
+            } else {
+                state.selectedTags.push(tag);
+                element.classList.add('bg-lavender-500', 'text-white');
+                element.classList.remove('bg-slate-100', 'dark:bg-slate-850', 'text-slate-600', 'dark:text-slate-300');
+            }
+        }
+
+        function saveMoodEntry(e) {
+            e.preventDefault();
+            const emoji = document.getElementById('selected-emoji').value;
+            const label = document.getElementById('selected-label').value;
+            const intensity = parseInt(document.getElementById('intensity-slider').value);
+            const note = document.getElementById('mood-note').value;
+
+            const newEntry = {
+                id: Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                emoji,
+                label,
+                intensity,
+                tags: [...state.selectedTags],
+                note
+            };
+
+            // Remove previous entry for today if exists (or append)
+            state.moods = state.moods.filter(m => m.date !== newEntry.date);
+            state.moods.push(newEntry);
+            localStorage.setItem('moodspace_moods', JSON.stringify(state.moods));
+
+            // Reset form
+            document.getElementById('mood-note').value = '';
+            state.selectedTags = [];
+            renderTags();
+
+            switchTab('dashboard');
+        }
+
+        /* ================= DASHBOARD RENDER ================= */
+        function renderDashboard() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayEntry = state.moods.find(m => m.date === todayStr);
+
+            const container = document.getElementById('today-mood-container');
+            const badge = document.getElementById('today-status-badge');
+
+            if (todayEntry) {
+                badge.innerText = 'Logged Today';
+                badge.className = 'text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-full font-medium';
+                container.innerHTML = `
+                    <div class="text-5xl mb-2 animate-bounce">${todayEntry.emoji}</div>
+                    <div class="font-bold text-lg">${todayEntry.label}</div>
+                    <div class="text-xs text-slate-400 mt-1">Intensity: ${todayEntry.intensity}/10</div>
+                    ${todayEntry.tags.length ? `<div class="flex flex-wrap gap-1 justify-center mt-3">${todayEntry.tags.map(t => `<span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">${t}</span>`).join('')}</div>` : ''}
+                `;
+            } else {
+                badge.innerText = 'Not Logged';
+                badge.className = 'text-xs bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 px-2.5 py-1 rounded-full font-medium';
+                container.innerHTML = `
+                    <div class="text-4xl mb-2 text-slate-300">❓</div>
+                    <div class="font-semibold text-sm text-slate-500">No entry for today</div>
+                    <button onclick="switchTab('checkin')" class="mt-3 text-xs text-lavender-600 font-bold hover:underline">+ Log now</button>
+                `;
+            }
+
+            // Weekly Strip
+            const strip = document.getElementById('weekly-strip');
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push(d.toISOString().split('T')[0]);
+            }
+
+            strip.innerHTML = days.map(dStr => {
+                const entry = state.moods.find(m => m.date === dStr);
+                const dObj = new Date(dStr + 'T00:00:00');
+                const dayName = dObj.toLocaleDateString('en-US', { weekday: 'narrow' });
+                return `
+                    <div class="flex flex-col items-center gap-2 p-2 rounded-2xl ${dStr === todayStr ? 'bg-lavender-100/50 dark:bg-slate-800 font-bold' : ''}">
+                        <span class="text-xs text-slate-400">${dayName}</span>
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-850 flex items-center justify-center text-lg">
+                            ${entry ? entry.emoji : '•'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ================= CALENDAR RENDER ================= */
+        function renderCalendar() {
+            const year = state.currentDate.getFullYear();
+            const month = state.currentDate.getMonth();
+
+            document.getElementById('calendar-month-year').innerText = new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            const container = document.getElementById('calendar-days');
+            container.innerHTML = '';
+
+            // Blank slots
+            for (let i = 0; i < firstDay; i++) {
+                container.innerHTML += `<div class="h-20 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30"></div>`;
+            }
+
+            // Days
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const entry = state.moods.find(m => m.date === dateStr);
+
+                container.innerHTML += `
+                    <div onclick="showDateDetail('${dateStr}')" class="h-20 p-2 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 hover:border-lavender-300 cursor-pointer flex flex-col justify-between transition">
+                        <span class="text-xs font-semibold ${entry ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400'}">${day}</span>
+                        <div class="text-center text-xl my-auto">
+                            ${entry ? entry.emoji : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function changeMonth(delta) {
+            state.currentDate.setMonth(state.currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function showDateDetail(dateStr) {
+            const entry = state.moods.find(m => m.date === dateStr);
+            const body = document.getElementById('detail-modal-body');
+
+            if (entry) {
+                body.innerHTML = `
+                    <div class="text-center py-2 space-y-2">
+                        <span class="text-5xl">${entry.emoji}</span>
+                        <h4 class="font-bold text-xl">${entry.label}</h4>
+                        <p class="text-xs text-slate-400">Intensity: ${entry.intensity}/10 • ${entry.time}</p>
+                    </div>
+                    ${entry.tags.length ? `<div class="flex flex-wrap gap-1 justify-center">${entry.tags.map(t => `<span class="text-xs bg-lavender-100 dark:bg-lavender-950 text-lavender-700 dark:text-lavender-300 px-2.5 py-1 rounded-full">${t}</span>`).join('')}</div>` : ''}
+                    <div class="p-3 bg-slate-50 dark:bg-slate-850 rounded-xl text-sm italic text-slate-600 dark:text-slate-300">
+                        "${entry.note || 'No notes added for this day.'}"
+                    </div>
+                `;
+            } else {
+                body.innerHTML = `
+                    <p class="text-center text-slate-400 py-6 text-sm">No mood entry recorded for ${dateStr}.</p>
+                `;
+            }
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        /* ================= STATS & INSIGHTS ================= */
+        function renderInsights() {
+            if (state.moods.length === 0) {
+                document.getElementById('insight-top-mood').innerText = 'No Data';
+                document.getElementById('insight-avg-intensity').innerText = '0 / 10';
+                document.getElementById('insight-total-count').innerText = '0 Days';
+                document.getElementById('smart-insights-text').innerText = 'Start tracking your daily mood to generate insights!';
+                return;
+            }
+
+            // Calculations
+            const counts = {};
+            let totalIntensity = 0;
+            state.moods.forEach(m => {
+                counts[m.label] = (counts[m.label] || 0) + 1;
+                totalIntensity += m.intensity;
+            });
+
+            const topMood = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            const topEmojiObj = EMOJIS.find(e => e.label === topMood);
+
+            document.getElementById('insight-top-emoji').innerText = topEmojiObj ? topEmojiObj.emoji : '✨';
+            document.getElementById('insight-top-mood').innerText = topMood;
+            document.getElementById('insight-avg-intensity').innerText = (totalIntensity / state.moods.length).toFixed(1) + ' / 10';
+            document.getElementById('insight-total-count').innerText = `${state.moods.length} Days`;
+
+            // Smart Text Reflection
+            let reflection = `Your most common emotional state recently has been <strong>${topMood}</strong>. `;
+            if (topMood === 'Happy' || topMood === 'Calm' || topMood === 'Excited' || topMood === 'Loved') {
+                reflection += "You've been experiencing a steady positive streak! Keep embracing activities that foster joy.";
+            } else {
+                reflection += "Remember that it's okay to experience difficult emotions. Be kind to yourself and try the breathing exercises in the Self-Care section.";
+            }
+            document.getElementById('smart-insights-text').innerHTML = reflection;
+
+            renderCharts();
+        }
+
+        function renderCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#cbd5e1' : '#475569';
+
+            // Chart 1: Distribution
+            const counts = {};
+            EMOJIS.forEach(e => counts[e.label] = 0);
+            state.moods.forEach(m => counts[m.label] = (counts[m.label] || 0) + 1);
+
+            const ctx1 = document.getElementById('chart-distribution').getContext('2d');
+            if (distributionChart) distributionChart.destroy();
+
+            distributionChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(counts),
+                    datasets: [{
+                        data: Object.values(counts),
+                        backgroundColor: EMOJIS.map(e => e.color),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: textColor, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // Chart 2: Trend
+            const sorted = [...state.moods].sort((a,b) => new Date(a.date) - new Date(b.date)).slice(-10);
+            const ctx2 = document.getElementById('chart-trend').getContext('2d');
+            if (trendChart) trendChart.destroy();
+
+            trendChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: sorted.map(s => s.date.slice(5)),
+                    datasets: [{
+                        label: 'Intensity',
+                        data: sorted.map(s => s.intensity),
+                        borderColor: '#b17aff',
+                        backgroundColor: 'rgba(177, 122, 255, 0.15)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 1, max: 10, ticks: { color: textColor } },
+                        x: { ticks: { color: textColor } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        /* ================= JOURNAL LOGIC ================= */
+        function renderJournalEntries() {
+            const container = document.getElementById('journal-entries-list');
+            const query = document.getElementById('journal-search').value.toLowerCase();
+
+            const filtered = state.journals.filter(j => 
+                j.title.toLowerCase().includes(query) || j.content.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="col-span-2 text-center text-slate-400 py-8 text-sm">No journal entries found.</p>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(j => `
+                <div class="journal-paper p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-4">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-lg text-slate-800 dark:text-slate-100">${j.title}</h3>
+                            <span class="text-[11px] text-slate-400">${j.date}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-4 whitespace-pre-line">${j.content}</p>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-200/40 dark:border-slate-800/40">
+                        <button onclick="editJournal(${j.id})" class="text-xs text-lavender-600 dark:text-lavender-400 font-medium px-2 py-1 rounded hover:bg-lavender-50 dark:hover:bg-slate-800">Edit</button>
+                        <button onclick="deleteJournal(${j.id})" class="text-xs text-rose-500 font-medium px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-slate-800">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openJournalModal() {
+            document.getElementById('journal-id').value = '';
+            document.getElementById('journal-title-input').value = '';
+            document.getElementById('journal-content-input').value = '';
+            document.getElementById('modal-title').innerText = 'New Journal Entry';
+            document.getElementById('journal-modal').classList.remove('hidden');
+        }
+
+        function closeJournalModal() {
+            document.getElementById('journal-modal').classList.add('hidden');
+        }
+
+        function saveJournalEntry(e) {
+            e.preventDefault();
+            const id = document.getElementById('journal-id').value;
+            const title = document.getElementById('journal-title-input').value;
+            const content = document.getElementById('journal-content-input').value;
+
+            if (id) {
+                const idx = state.journals.findIndex(j => j.id == id);
+                if (idx !== -1) {
+                    state.journals[idx].title = title;
+                    state.journals[idx].content = content;
+                }
+            } else {
+                state.journals.unshift({
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    title,
+                    content
+                });
+            }
+
+            localStorage.setItem('moodspace_journals', JSON.stringify(state.journals));
+            closeJournalModal();
+            renderJournalEntries();
+        }
+
+        function editJournal(id) {
+            const j = state.journals.find(item => item.id === id);
+            if (!j) return;
+
+            document.getElementById('journal-id').value = j.id;
+            document.getElementById('journal-title-input').value = j.title;
+            document.getElementById('journal-content-input').value = j.content;
+            document.getElementById('modal-title').innerText = 'Edit Journal Entry';
+            document.getElementById('journal-modal').classList.remove('hidden');
+        }
+
+        function deleteJournal(id) {
+            state.journals = state.journals.filter(j => j.id !== id);
+            localStorage.setItem('moodspace_journals', JSON.stringify(state.journals));
+            renderJournalEntries();
+        }
+
+        /* ================= SELF CARE SECTION ================= */
+        let isBreathing = false;
+
+        function toggleBreathingExercise() {
+            const btn = document.getElementById('breath-btn');
+            const circle = document.getElementById('breath-circle');
+            const text = document.getElementById('breath-text');
+
+            if (isBreathing) {
+                clearInterval(breathInterval);
+                circle.classList.remove('animate-breathe');
+                text.innerText = 'Press Start';
+                btn.innerText = 'Start Exercise';
+                isBreathing = false;
+            } else {
+                btn.innerText = 'Stop';
+                circle.classList.add('animate-breathe');
+                isBreathing = true;
+
+                let step = 0;
+                const phases = ['Inhale...', 'Hold...', 'Exhale...'];
+                text.innerText = phases[0];
+
+                breathInterval = setInterval(() => {
+                    step = (step + 1) % phases.length;
+                    text.innerText = phases[step];
+                }, 2600);
+            }
+        }
+
+        function loadRandomQuote() {
+            const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+            document.getElementById('quote-text').innerText = `"${q.text}"`;
+            document.getElementById('quote-author').innerText = `— ${q.author}`;
+        }
+
+        function nextAffirmation() {
+            const a = AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)];
+            document.getElementById('affirmation-display').innerText = `"${a}"`;
+        }
+
+        function renderGratitudeList() {
+            const list = document.getElementById('gratitude-list');
+            list.innerHTML = state.gratitude.map((item, idx) => `
+                <li class="flex items-center justify-between text-xs p-2 bg-slate-50 dark:bg-slate-850 rounded-xl">
+                    <span class="text-slate-700 dark:text-slate-300">🌸 ${item}</span>
+                    <button onclick="removeGratitude(${idx})" class="text-slate-400 hover:text-rose-500">&times;</button>
+                </li>
+            `).join('');
+        }
+
+        function addGratitudeItem() {
+            const input = document.getElementById('gratitude-input');
+            const val = input.value.trim();
+            if (val) {
+                state.gratitude.push(val);
+                localStorage.setItem('moodspace_gratitude', JSON.stringify(state.gratitude));
+                input.value = '';
+                renderGratitudeList();
+            }
+        }
+
+        function removeGratitude(idx) {
+            state.gratitude.splice(idx, 1);
+            localStorage.setItem('moodspace_gratitude', JSON.stringify(state.gratitude));
+            renderGratitudeList();
+        }
+
+        /* ================= EXPORT & CLEAR DATA ================= */
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `moodspace_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function confirmClearData() {
+            if (confirm("Are you sure you want to clear all your saved mood logs and journal entries?")) {
+                localStorage.clear();
+                state.moods = [];
+                state.journals = [];
+                state.gratitude = [];
+                renderDashboard();
+                renderCalendar();
+                renderJournalEntries();
+                renderGratitudeList();
+            }
+        }
+    </script>
+</body>
+</html>
